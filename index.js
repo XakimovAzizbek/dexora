@@ -1,31 +1,11 @@
-// Gradio'ning rasmiy mijozini yuklaymiz
-import { Client } from "https://cdn.jsdelivr.net/npm/@gradio/client/dist/index.min.js";
-
-// Hugging Face'dagi Space manzili (Faqat username/space_nomi)
-const SPACE_NAME = "azizbek1/dexora"; 
+// Space manzilingiz (Oxirida qiya chiziq / bo'lmasin)
+const API_URL = "https://azizbek1-dexora.hf.space/api/predict";
 
 const chat = document.getElementById("chat");
 const form = document.getElementById("form");
 const input = document.getElementById("input");
 const sendBtn = document.getElementById("send");
 
-let client = null;
-let isConnected = false;
-
-// Ulanish funksiyasi
-async function connectToDexora() {
-  try {
-    // Server uxlab yotgan bo'lsa, bu qator uni uyg'otadi
-    client = await Client.connect(SPACE_NAME);
-    isConnected = true;
-    console.log("Dexora serveriga muvaffaqiyatli ulandik!");
-  } catch (err) {
-    console.error("Ulanishda xato:", err);
-    isConnected = false;
-  }
-}
-
-// Xabarni ekranga chiqarish
 function addMessage(role, text) {
   const div = document.createElement("div");
   div.className = `msg ${role}`;
@@ -41,48 +21,54 @@ function addMessage(role, text) {
   return div;
 }
 
-// Forma yuborilganda
 form.addEventListener("submit", async (e) => {
   e.preventDefault();
   
   const message = input.value.trim();
   if (!message) return;
 
-  // 1. Foydalanuvchi xabarini chiqarish
   addMessage("user", message);
   input.value = "";
   input.disabled = true;
   sendBtn.disabled = true;
 
-  // 2. Bot yozmoqda animatsiyasi
   const botDiv = addMessage("bot", "...");
 
   try {
-    // Agar oldin ulanmagan bo'lsak, hozir ulanamiz
-    if (!isConnected) {
-      botDiv.textContent = "Server uyg'onmoqda, kuting...";
-      await connectToDexora();
-    }
+    // Timeout qo'shamiz, chunki ZeroGPU uyg'onishi 30 soniya olishi mumkin
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 60000); // 60 soniya kutadi
 
-    if (isConnected && client) {
-      botDiv.innerHTML = '<div class="typing"><span></span><span></span><span></span></div>';
-      
-      // Gradio'ga so'rov yuborish (/predict - bu standart API manzili)
-      const result = await client.predict("/predict", [message]);
-      
-      // Javobni olish
-      if (result && result.data && result.data.length > 0) {
-        botDiv.textContent = result.data[0];
-      } else {
-        botDiv.textContent = "Javob bo'sh keldi.";
-      }
+    const response = await fetch(API_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ 
+        data: [message],
+        fn_index: 0 // Gradio'dagi standart funksiya indeksi
+      }),
+      signal: controller.signal
+    });
+    
+    clearTimeout(timeoutId);
+
+    if (!response.ok) {
+        throw new Error(`Server xatosi: ${response.status}`);
+    }
+    
+    const result = await response.json();
+    
+    if (result && result.data && result.data.length > 0) {
+      botDiv.textContent = result.data[0];
     } else {
-      throw new Error("Server bilan aloqa yo'q");
+      botDiv.textContent = "Javob olinmadi.";
     }
-
   } catch (error) {
     console.error(error);
-    botDiv.textContent = "Server uyg'onishda xato berdi. Iltimos, 10 soniya kutib qayta urining.";
+    if (error.name === 'AbortError') {
+        botDiv.textContent = "Server juda uzoq uyg'ondi. Iltimos qayta yuboring.";
+    } else {
+        botDiv.textContent = "Xato: " + error.message;
+    }
     botDiv.style.color = "#ef4444";
   } finally {
     input.disabled = false;
@@ -91,6 +77,3 @@ form.addEventListener("submit", async (e) => {
     chat.scrollTop = chat.scrollHeight;
   }
 });
-
-// Sayt ochilishi bilan orqa fonda serverga ulanib qo'yamiz (uxlab qolmasligi uchun)
-connectToDexora();
