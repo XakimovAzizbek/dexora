@@ -34,7 +34,7 @@ form.addEventListener("submit", async (e) => {
     // Serverga ulanish
     const app = await Client.connect("azizbek1/dexora");
     
-    // Endi api_name aniq "predict" bo'lgani uchun shu manzilga yuboramiz
+    // MANA SHU YERDA /predict QILINDI
     const result = await app.predict("/predict", [message]);
     
     if (result && result.data && result.data.length > 0) {
@@ -45,7 +45,6 @@ form.addEventListener("submit", async (e) => {
 
   } catch (error) {
     console.error("To'liq xato:", error);
-    // Xatoni to'g'ridan-to'g'ri ekranga chiqaramiz
     botDiv.textContent = "Xato: " + error.message;
     botDiv.style.color = "#ef4444";
   } finally {
