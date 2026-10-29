@@ -1,41 +1,43 @@
 <!DOCTYPE html>
 <html lang="uz">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Dexora</title>
-<link rel="stylesheet" href="index.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Dexora</title>
+  <link rel="stylesheet" href="index.css">
 </head>
 <body>
-<header>
-  <h1>Dexora</h1>
-  <p>Brauzeringizda ishlaydigan AI. Kalit yo'q, server yo'q.</p>
-</header>
+  <div class="bg-blobs">
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+  </div>
 
-<section id="loader">
-  <label for="model">Model</label>
-  <select id="model">
-    <option value="Qwen2.5-0.5B-Instruct-q4f16_1-MLC">Qwen2.5 0.5B (yengil, ~400 MB)</option>
-    <option value="Qwen2.5-1.5B-Instruct-q4f16_1-MLC">Qwen2.5 1.5B (aqlliroq, ~1 GB)</option>
-  </select>
-  <button id="load">Modelni yuklash</button>
-  <div id="bar" hidden><div id="fill"></div></div>
-  <p id="status">WebGPU tekshirilmoqda...</p>
-</section>
+  <header>
+    <div class="logo">Dexora</div>
+    <div class="status-wrapper">
+      <span class="status-dot"></span>
+      <span class="status-text">Onlayn</span>
+    </div>
+  </header>
 
-<main id="chat" aria-live="polite"></main>
+  <main id="chat" aria-live="polite">
+    <div class="msg bot">
+      Salom! Men Dexoraman. Menga savol bering.
+    </div>
+  </main>
 
-<div id="tests" hidden>
-  <button data-q="Salom! O'zingni tanishtir.">Salom</button>
-  <button data-q="O'zbekiston poytaxti qaysi shahar va u haqida 2 ta gap ayt.">Poytaxt</button>
-  <button data-q="Translate to English: Men bugun bozorga bordim.">Tarjima</button>
-</div>
+  <form id="form" autocomplete="off">
+    <div class="input-wrapper">
+      <input id="input" placeholder="Xabar yozing..." required>
+      <button id="send" type="submit" aria-label="Yuborish">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="22" y1="2" x2="11" y2="13"></line>
+          <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+        </svg>
+      </button>
+    </div>
+  </form>
 
-<form id="form" autocomplete="off">
-  <input id="input" placeholder="Xabar yozing..." disabled>
-  <button id="send" disabled>Yuborish</button>
-</form>
-
-<script type="module" src="index.js"></script>
+  <script src="index.js"></script>
 </body>
 </html>
